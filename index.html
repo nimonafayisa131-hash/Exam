@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Online Exam System</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- LANDING -->
+<div id="screen-landing" class="screen active">
+  <div class="landing-card">
+    <div class="logo-ring">
+      <img src="logo1.jpg">
+    </div>
+    <h1>Global College Online Exam System</h1>
+    <p class="tagline">Multi-course · Secure · Single-attempt per student</p>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="goStudentRegister()">📝 Take Exam</button>
+      <button class="btn btn-secondary" onclick="goAdminLogin()">🔐 Admin</button>
+    </div>
+  </div>
+</div>
+
+<!-- STUDENT REGISTER -->
+<div id="screen-register" class="screen form-page">
+  <div class="form-card">
+    <button class="back-link" onclick="showScreen('screen-landing')">← Back</button>
+    <h2>Student Registration</h2>
+    <p class="subtitle">Enter your details and choose a course to begin</p>
+    <div id="reg-error" class="form-error"></div>
+    <div class="form-group">
+      <label>Full Name</label>
+      <input type="text" id="student-name" placeholder="maqaa guutuu">
+    </div>
+    <div class="form-group">
+      <label>Student ID</label>
+      <input type="text" id="student-id" placeholder="Idno kee galchi">
+    </div>
+    <div class="form-group">
+      <label>Department</label>
+      <select id="student-dept">
+        <option value="">-- Select --</option>
+        <option>Computer Science</option>
+        <option>WDDBA</option>
+        <option>HNS</option>
+        <option>Nurse</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Select Course</label>
+      <select id="course-select-dropdown">
+        <option value="">-- Choose a course --</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:0.5rem" onclick="handleStudentRegister()">Continue →</button>
+  </div>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div id="screen-admin-login" class="screen form-page">
+  <div class="form-card">
+    <button class="back-link" onclick="showScreen('screen-landing')">← Back</button>
+    <div class="admin-badge">🔐 Admin Access</div>
+    <h2>Admin Login</h2>
+    <p class="subtitle">Enter credentials to access the dashboard</p>
+    <div id="login-error" class="form-error"></div>
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="admin-username" placeholder="admin">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="admin-password" placeholder="••••••••">
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:0.5rem" onclick="handleAdminLogin()">Login →</button>
+  </div>
+</div>
+
+<!-- EXAM -->
+<div id="screen-exam" class="screen">
+  <div class="exam-header">
+    <div class="exam-header-info">
+      <h3 id="exam-student-label">Student</h3>
+      <p id="exam-q-label">Question 1 / 10</p>
+    </div>
+    <div class="timer-ring">
+      <svg viewBox="0 0 60 60">
+        <circle class="bg" cx="30" cy="30" r="26"/>
+        <circle class="progress" id="timer-circle" cx="30" cy="30" r="26" stroke-dasharray="163.36" stroke-dashoffset="0"/>
+      </svg>
+      <div class="timer-text" id="timer-display">20:00</div>
+    </div>
+  </div>
+  <div class="exam-progress-bar"><div class="exam-progress-fill" id="exam-progress"></div></div>
+  <div class="exam-body">
+    <div class="question-counter" id="q-counter"></div>
+    <div class="question-text" id="q-text"></div>
+    <div class="options-list" id="q-options"></div>
+  </div>
+  <div class="exam-nav">
+    <button class="btn-nav btn-prev" id="btn-prev" onclick="prevQuestion()">← Previous</button>
+    <span id="q-dot-status" style="font-size:0.8rem;color:#64748B;font-weight:600"></span>
+    <button class="btn-nav btn-next-q" id="btn-next" onclick="nextQuestion()">Next →</button>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="screen-result" class="screen" style="align-items:center;justify-content:center;padding:2rem;background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%)">
+  <div class="result-card">
+    <div class="result-score-ring">
+      <svg viewBox="0 0 140 140">
+        <circle class="bg" cx="70" cy="70" r="60"/>
+        <circle class="fill" id="result-circle" cx="70" cy="70" r="60" stroke-dasharray="376.99" stroke-dashoffset="376.99"/>
+      </svg>
+      <div class="result-score-text">
+        <div class="pct" id="result-pct">0%</div>
+        <div class="lbl">Score</div>
+      </div>
+    </div>
+    <h2 id="result-heading">Congratulations!</h2>
+    <p id="result-name-line"></p>
+    <div class="result-stats">
+      <div class="stat-box correct"><div class="num" id="res-correct">0</div><div class="lbl">Correct</div></div>
+      <div class="stat-box wrong"><div class="num" id="res-wrong">0</div><div class="lbl">Wrong</div></div>
+      <div class="stat-box total"><div class="num" id="res-total">0</div><div class="lbl">Total</div></div>
+    </div>
+    <div class="result-status" id="result-status"></div>
+    <div class="submitted-note">✅ Your result has been submitted to Admin successfully.</div>
+    <div class="result-actions">
+      <button class="btn btn-blue" onclick="showReviewScreen()">📋 View Answers</button>
+      <button class="btn btn-secondary" onclick="studentLogout()">🏠 Back to Home</button>
+    </div>
+  </div>
+</div>
+
+<!-- REVIEW ANSWERS SCREEN -->
+<div id="screen-review" class="screen">
+  <div class="review-header">
+    <div class="review-header-info">
+      <h3>📋 Answer Review</h3>
+      <p id="review-subtitle"></p>
+    </div>
+    <button class="btn btn-outline-white" onclick="showScreen('screen-result')">← Back to Result</button>
+  </div>
+  <div class="review-body" id="review-body"></div>
+</div>
+
+<!-- BLOCKED -->
+<div id="screen-blocked" class="screen">
+  <div class="blocked-card">
+    <div class="blocked-icon">🚫</div>
+    <h2>Already Attempted</h2>
+    <p>Student ID <strong id="blocked-id"></strong> has already taken the <strong id="blocked-course"></strong> exam.<br><br>Each student may only take each course exam once.</p>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div id="screen-admin" class="screen">
+  <div class="admin-header">
+    <div>
+      <h2>🎓 Admin Dashboard</h2>
+      <span>Online Exam System — Full Control</span>
+    </div>
+    <button class="btn btn-outline-white" onclick="adminLogout()">Logout →</button>
+  </div>
+  <div class="admin-tabs">
+    <button class="tab-btn active" onclick="switchTab('tab-results',this)">📊 Results</button>
+    <button class="tab-btn" onclick="switchTab('tab-courses',this)">📚 Courses</button>
+    <button class="tab-btn" onclick="switchTab('tab-settings',this)">⚙️ Settings</button>
+  </div>
+  <div class="admin-body">
+
+    <!-- RESULTS TAB -->
+    <div id="tab-results" class="tab-panel active">
+      <div class="admin-stats">
+        <div class="admin-stat-card courses"><div class="label">Total Courses</div><div class="value" id="stat-courses">0</div></div>
+        <div class="admin-stat-card"><div class="label">Students Tested</div><div class="value" id="stat-total">0</div></div>
+        <div class="admin-stat-card pass"><div class="label">Passed</div><div class="value" id="stat-pass">0</div></div>
+        <div class="admin-stat-card fail"><div class="label">Failed</div><div class="value" id="stat-fail">0</div></div>
+      </div>
+      <div class="top-row">
+        <div class="section-title" style="margin-bottom:0">📋 Student Results</div>
+        <div class="results-filter">
+          <select class="filter-select" id="filter-course" onchange="loadResultsTab()">
+            <option value="">All Courses</option>
+          </select>
+          <button class="clear-btn" onclick="confirmClearAll()">🗑️ Clear All</button>
+        </div>
+      </div>
+      <div class="results-table-wrap" style="margin-top:1rem">
+        <table class="results-table">
+          <thead>
+            <tr><th>#</th><th>Name</th><th>ID</th><th>Dept</th><th>Course</th><th>Score</th><th>Correct/Total</th><th>Status</th><th>Time Taken</th><th>Date</th></tr>
+          </thead>
+          <tbody id="results-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- COURSES TAB -->
+    <div id="tab-courses" class="tab-panel">
+      <div id="view-courses">
+        <div class="top-row">
+          <div class="section-title" style="margin-bottom:0">📚 Manage Courses</div>
+          <button class="btn btn-primary btn-sm" onclick="openAddCourse()">+ Add Course</button>
+        </div>
+        <div class="courses-grid" id="courses-grid"></div>
+      </div>
+      <div id="view-questions" style="display:none">
+        <div class="q-panel-header">
+          <button class="q-panel-back" onclick="backToCourses()">← Courses</button>
+          <div>
+            <div class="q-panel-title" id="qpanel-course-name">Course Questions</div>
+            <div style="font-size:0.78rem;color:var(--gray-600);margin-top:0.1rem" id="qpanel-q-count"></div>
+          </div>
+          <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="openAddQuestion()">+ Add Question</button>
+        </div>
+        <div class="q-list" id="q-list"></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div id="tab-settings" class="tab-panel">
+      <div class="section-title" style="margin-bottom:1.5rem">⚙️ Global Exam Settings</div>
+      <div class="settings-grid">
+        <div class="settings-card">
+          <h3>⏱️ Time & Passing</h3>
+          <div class="setting-row">
+            <div><div class="setting-label">Exam Duration (minutes)</div><div class="setting-hint">Default time for all courses</div></div>
+            <input type="number" class="setting-input" id="set-time" min="1" max="180" value="20">
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Pass Percentage (%)</div><div class="setting-hint">Minimum score to pass</div></div>
+            <input type="number" class="setting-input" id="set-pass" min="1" max="100" value="50">
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Questions Per Exam</div><div class="setting-hint">0 = use all questions</div></div>
+            <input type="number" class="setting-input" id="set-qcount" min="0" max="200" value="0">
+          </div>
+        </div>
+        <div class="settings-card">
+          <h3>🔀 Shuffle Options</h3>
+          <div class="setting-row">
+            <div><div class="setting-label">Shuffle Questions</div><div class="setting-hint">Different order per student</div></div>
+            <label class="toggle"><input type="checkbox" id="set-shuffle-q" checked><span class="toggle-slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Shuffle Answer Options</div><div class="setting-hint">A/B/C/D randomized per student</div></div>
+            <label class="toggle"><input type="checkbox" id="set-shuffle-a" checked><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:1.5rem;display:flex;justify-content:flex-end">
+        <button class="btn btn-primary" onclick="saveSettings()">💾 Save Settings</button>
+      </div>
+      <div id="settings-msg" class="form-success" style="margin-top:1rem"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL: Submit Confirm -->
+<div class="modal-overlay" id="submit-modal">
+  <div class="modal modal-center">
+    <h3>Submit Exam?</h3>
+    <p>Please review your answers before submitting. You cannot go back after submission.</p>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="closeModal('submit-modal')">Review</button>
+      <button class="btn btn-success" onclick="submitExam()">✔ Submit</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Clear All -->
+<div class="modal-overlay" id="clear-modal">
+  <div class="modal modal-center">
+    <h3>Clear All Results?</h3>
+    <p>This will delete all student results and attempt records. This cannot be undone!</p>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="closeModal('clear-modal')">Cancel</button>
+      <button class="btn btn-danger" onclick="clearAllData()">🗑️ Clear</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add/Edit Course -->
+<div class="modal-overlay" id="course-modal">
+  <div class="modal">
+    <h3 id="course-modal-title">Add New Course</h3>
+    <p class="modal-sub" id="course-modal-sub">Fill in the course details</p>
+    <div id="course-modal-error" class="form-error"></div>
+    <div class="form-group"><label>Course Name</label><input type="text" id="cm-name" placeholder="e.g. SQL Fundamentals"></div>
+    <div class="form-group"><label>Description (optional)</label><input type="text" id="cm-desc" placeholder="e.g. Basic SQL for Level III"></div>
+    <div class="form-group">
+      <label>Icon (emoji)</label>
+      <input type="text" id="cm-icon" placeholder="e.g. 🗄️" maxlength="4" style="width:80px">
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="closeModal('course-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCourse()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Delete Course -->
+<div class="modal-overlay" id="del-course-modal">
+  <div class="modal modal-center">
+    <h3>Delete Course?</h3>
+    <p>This will permanently delete the course and all its questions. Results are kept.</p>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="closeModal('del-course-modal')">Cancel</button>
+      <button class="btn btn-danger" onclick="deleteCourse()">🗑️ Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add/Edit Question -->
+<div class="modal-overlay" id="q-modal">
+  <div class="modal">
+    <h3 id="q-modal-title">Add Question</h3>
+    <p class="modal-sub" id="q-modal-sub">Enter the question and answer options</p>
+
+    <!-- Question Type Selector -->
+    <div class="form-group">
+      <label>Question Type</label>
+      <div class="qtype-select">
+        <button class="qtype-btn active" data-type="mcq" onclick="setQuestionType('mcq')">🔵 Multiple Choice</button>
+        <button class="qtype-btn" data-type="tf" onclick="setQuestionType('tf')">✅ True / False</button>
+      </div>
+    </div>
+
+    <div class="form-group"><label>Question</label><textarea id="qm-question" placeholder="Type your question here..."></textarea></div>
+
+    <!-- MCQ options -->
+    <div id="qm-mcq-section">
+      <div class="opts-grid">
+        <div class="form-group" style="margin-bottom:0"><label>Option A</label><input type="text" id="qm-opt0" placeholder="Option A"></div>
+        <div class="form-group" style="margin-bottom:0"><label>Option B</label><input type="text" id="qm-opt1" placeholder="Option B"></div>
+        <div class="form-group" style="margin-bottom:0"><label>Option C</label><input type="text" id="qm-opt2" placeholder="Option C"></div>
+        <div class="form-group" style="margin-bottom:0"><label>Option D</label><input type="text" id="qm-opt3" placeholder="Option D"></div>
+      </div>
+      <div class="form-group" style="margin-top:1rem">
+        <label>Correct Answer</label>
+        <div class="correct-select">
+          <button class="correct-btn" data-idx="0" onclick="selectCorrect(0)">A</button>
+          <button class="correct-btn" data-idx="1" onclick="selectCorrect(1)">B</button>
+          <button class="correct-btn" data-idx="2" onclick="selectCorrect(2)">C</button>
+          <button class="correct-btn" data-idx="3" onclick="selectCorrect(3)">D</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- True/False options -->
+    <div id="qm-tf-section" style="display:none">
+      <div class="form-group" style="margin-top:0.5rem">
+        <label>Correct Answer</label>
+        <div class="correct-select">
+          <button class="correct-btn tf-btn" data-tf="0" onclick="selectTF(0)">✅ True</button>
+          <button class="correct-btn tf-btn" data-tf="1" onclick="selectTF(1)">❌ False</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="qm-error" class="form-error"></div>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="closeModal('q-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveQuestion()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Delete Question -->
+<div class="modal-overlay" id="del-q-modal">
+  <div class="modal modal-center">
+    <h3>Delete Question?</h3>
+    <p>This question will be permanently removed.</p>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" onclick="closeModal('del-q-modal')">Cancel</button>
+      <button class="btn btn-danger" onclick="deleteQuestion()">🗑️ Delete</button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
